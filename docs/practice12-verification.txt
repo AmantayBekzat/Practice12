@@ -1,6 +1,6 @@
 ================================================================================
 PRACTICE 12 — VERIFICATION RESULTS
-Actual command outputs, 2026-11-26
+Actual command outputs (final, after browser-review fixes), 2026-11-26
 ================================================================================
 
 BASELINE (prior turn, recorded):
@@ -10,18 +10,18 @@ BASELINE (prior turn, recorded):
   npm run lint: OK
 
 ================================================================================
-COMMAND: npx vitest run
+COMMAND: npx vitest run  (final)
 EXIT CODE: 0
 ================================================================================
  RUN  v2.1.9 /home/project
 
- ✓ src/lib/practice12.test.ts (18 tests) 9ms
- ✓ src/lib/validation.test.ts (17 tests) 4ms
+ ✓ src/lib/practice12.test.ts (18 tests) 5ms
+ ✓ src/lib/validation.test.ts (17 tests) 5ms
 
  Test Files  2 passed (2)
       Tests  35 passed (35)
-   Start at  10:26:06
-   Duration  458ms (transform 53ms, setup 0ms, collect 64ms, tests 13ms, environment 0ms, prepare 170ms)
+   Start at  10:45:40
+   Duration  487ms (transform 55ms, setup 0ms, collect 66ms, tests 10ms, environment 0ms, prepare 181ms)
 
 Test totals: 35 passed, 0 failed.
   - Inherited validation tests: 17 passed, 0 failed (preserved, unchanged)
@@ -29,7 +29,7 @@ Test totals: 35 passed, 0 failed.
 Compared with 17-test baseline: +18 new tests, 0 regressions.
 
 ================================================================================
-COMMAND: npm run build
+COMMAND: npm run build  (final)
 EXIT CODE: 0
 ================================================================================
 > vite-react-typescript-starter@0.0.0 build
@@ -44,14 +44,14 @@ Browserslist: caniuse-lite is outdated. Please run:
 rendering chunks...
 computing gzip size...
 dist/index.html                   0.71 kB │ gzip:  0.38 kB
-dist/assets/index-Cqkj0fwb.css   15.69 kB │ gzip:  3.78 kB
-dist/assets/index-C9W9yPgc.js   169.34 kB │ gzip: 52.67 kB
-✓ built in 2.01s
+dist/assets/index-CmJEi6Px.css   15.76 kB │ gzip:  3.80 kB
+dist/assets/index-ecl1GFjZ.js   169.48 kB │ gzip: 52.72 kB
+✓ built in 1.87s
 
 (The Browserslist caniuse-lite notice is informational, not an error.)
 
 ================================================================================
-COMMAND: npm run typecheck
+COMMAND: npm run typecheck  (final)
 EXIT CODE: 0
 ================================================================================
 > vite-react-typescript-starter@0.0.0 typecheck
@@ -60,7 +60,7 @@ EXIT CODE: 0
 No type errors.
 
 ================================================================================
-COMMAND: npm run lint
+COMMAND: npm run lint  (final)
 EXIT CODE: 0
 ================================================================================
 > vite-react-typescript-starter@0.0.0 lint
@@ -69,60 +69,69 @@ EXIT CODE: 0
 No lint errors.
 
 ================================================================================
-REGRESSIONS ENCOUNTERED AND FIXED DURING IMPLEMENTATION
+BROWSER-REVIEW FIXES APPLIED THIS TURN (Practice12Panel.tsx only)
 ================================================================================
-1. practice12.test.ts midnight-boundary test initially used duration=480 which
-   exceeds the 120-minute limit, so it correctly returned INVALID_DURATION, not
-   AVAILABLE. Fixed the test input to start=1320, duration=120 (end=1440) which
-   is a valid 120-minute interval ending at midnight. This was a test-input
-   error, not a production bug. No tests were weakened.
+1. Horizontal overflow at 390px viewport (scrollWidth 585 > clientWidth 329):
+   - Wrapped the shared-test <table> in a div.overflow-x-auto.min-w-0 container.
+   - Table uses min-w-[480px] w-full so it scrolls horizontally inside the
+     container instead of forcing the document to overflow.
+   - Added min-w-0 to the panel header text block, grid input cells, and the
+     shared-results wrapper so flex/grid children can shrink and wrap.
 
-2. practice12.ts had an unused 'Booking' type import. Removed it. No behavior
-   change.
+2. Validation-error styling for app-level rejection codes:
+   - Results with reasonCode INVALID_INPUT, INVALID_DURATION, INVALID_WINDOW,
+     or PAST_START now show "Validation error" with amber styling and the
+     AlertCircle icon, instead of "Unavailable".
+   - reasonCode is always displayed (including validation errors).
+   - Result banner has role="status" aria-live="polite".
+   - Removed the old kind="ok"/"validation-error" DisplayState union; the panel
+     now stores a plain Practice12Output, since every output carries a reasonCode.
 
-Neither fix weakened any assertion or modified production rule logic.
+3. Label association:
+   - Start time <label> uses htmlFor="practice12-start" with matching input id.
+   - Duration <label> uses htmlFor="practice12-duration" with matching input id.
+
+4. Blank duration handling:
+   - handleRunCheck converts a blank duration string to NaN before calling
+     checkCommonAvailability, so it becomes INVALID_INPUT (not Number('')=0).
+   - The comparison module's isInteger guard already rejects NaN; no change to
+     practice12.ts was required.
+
+5. Implementation-facing wording removed:
+   - The info box no longer mentions the inherited main current-time control or
+     its 08:00 default. It now states only the fixed 09:00 experiment clock and
+     the fictional Newton 101 schedule.
+
+No production rule logic, fixtures, dependencies, or existing tests were
+modified. practice12.ts was not changed this turn.
 
 ================================================================================
-CHANGED / NEW FILE SUMMARY
+CHANGED / NEW FILE SUMMARY (cumulative)
 ================================================================================
 Modified files:
-  src/lib/types.ts          - Added ReasonCode type union and optional
-                              reasonCode field to CheckResult.
-  src/lib/validation.ts     - Attached reasonCode to every existing return
-                              (8 returns). Signature, branch order, decision
-                              and reason text preserved.
-  src/App.tsx               - Imported Practice12Panel and rendered it below
-                              the inherited main UI, above the footer.
+  src/lib/types.ts           - ReasonCode type union + optional reasonCode on CheckResult.
+  src/lib/validation.ts      - reasonCode attached to every existing return (8).
+  src/App.tsx                - Imports and renders Practice12Panel below main UI.
+  src/components/Practice12Panel.tsx - Collapsible panel (browser-review fixes this turn).
 
 New files:
-  src/lib/practice12.ts     - Comparison module: validates shared contract,
-                              clones r1 for scenario blocked flag, calls
-                              checkAvailability with original bookings and
-                              currentTime=540, maps to canonical output.
-                              Includes typed SHARED_TEST_CASES and
-                              runSharedTests() runner.
-  src/lib/practice12.test.ts - 18 focused Vitest tests (8 shared cases + edge
-                               cases + runner pass-count check).
-  src/components/Practice12Panel.tsx - Collapsible panel component with start
-                              time, duration, blocked checkbox, check button,
-                              "Run 8 shared tests" button, and result display.
-  docs/practice12-contract.txt  - Contract, ACs, scope comparison, timings.
+  src/lib/practice12.ts      - Comparison module + shared test runner.
+  src/lib/practice12.test.ts - 18 focused Vitest tests.
+  docs/practice12-contract.txt  - Contract, ACs, scope, timings.
   docs/practice12-verification.txt - This file.
 
 Unchanged files (confirmed):
-  src/lib/sampleData.ts     - Byte-identical (fixture data untouched).
-  src/lib/validation.test.ts - All 17 existing tests preserved, unchanged.
-  src/components/RoomCard.tsx, Timeline.tsx, ResultBanner.tsx - Unchanged.
-  package.json, package-lock.json, config files - Unchanged.
+  src/lib/sampleData.ts, src/lib/validation.test.ts, RoomCard.tsx, Timeline.tsx,
+  ResultBanner.tsx, package.json, package-lock.json, config files.
   No packages installed or upgraded.
 
 ================================================================================
 LIMITATIONS
 ================================================================================
-- Browser screenshots were NOT taken. No browser/screenshot tool is available in
-  this environment. AC6 desktop/mobile visual verification is pending unless the
-  UI is actually checked in a browser.
-- A separate Node-RED workflow is being prepared outside Bolt; this document does
-  not claim it is completed.
+- Browser verification was NOT repeated by the assistant. The user independently
+  confirmed 8/8 shared tests pass in the real UI and reported the issues fixed
+  above; the user will repeat the browser review.
+- No browser/screenshot tool is available in this environment.
+- A separate Node-RED workflow is being prepared outside Bolt; not claimed complete.
 - No services connected, no messages sent, no sharing/publishing modified.
 ================================================================================
