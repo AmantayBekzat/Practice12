@@ -21,7 +21,18 @@ export interface Interval {
 
 export type Decision = "available" | "unavailable";
 
+export type ReasonCode =
+  | "INVALID_INPUT"
+  | "INVALID_WINDOW"
+  | "PAST_START"
+  | "DURATION_LIMIT"
+  | "BLOCKED"
+  | "UNKNOWN_ROOM"
+  | "OVERLAP"
+  | "AVAILABLE";
+
 export interface CheckResult {
   decision: Decision;
   reason: string;
+  reasonCode?: ReasonCode;
 }

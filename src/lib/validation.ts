@@ -29,27 +29,27 @@ export function checkAvailability(
 
   // AC1: validate the interval window
   if (isNaN(start) || isNaN(end)) {
-    return { decision: "unavailable", reason: "Please enter a valid start and end time." };
+    return { decision: "unavailable", reason: "Please enter a valid start and end time.", reasonCode: "INVALID_INPUT" };
   }
   if (start < 0 || end <= start || end > DAY_END) {
-    return { decision: "unavailable", reason: "Time must be within 00:00–24:00 with start before end." };
+    return { decision: "unavailable", reason: "Time must be within 00:00–24:00 with start before end.", reasonCode: "INVALID_WINDOW" };
   }
   if (start <= currentTime) {
-    return { decision: "unavailable", reason: "Start time must be after the current time." };
+    return { decision: "unavailable", reason: "Start time must be after the current time.", reasonCode: "PAST_START" };
   }
 
   // AC2: reject bookings longer than 120 minutes
   if (end - start > MAX_BOOKING_MIN) {
-    return { decision: "unavailable", reason: "Booking exceeds the 120-minute maximum length." };
+    return { decision: "unavailable", reason: "Booking exceeds the 120-minute maximum length.", reasonCode: "DURATION_LIMIT" };
   }
 
   // AC3: reject when room is blocked
   const room = roomList.find((r) => r.id === roomId);
   if (!room) {
-    return { decision: "unavailable", reason: "Please select a valid room." };
+    return { decision: "unavailable", reason: "Please select a valid room.", reasonCode: "UNKNOWN_ROOM" };
   }
   if (room.blocked) {
-    return { decision: "unavailable", reason: `${room.name} is currently blocked and cannot be booked.` };
+    return { decision: "unavailable", reason: `${room.name} is currently blocked and cannot be booked.`, reasonCode: "BLOCKED" };
   }
 
   // AC4: reject overlaps with existing bookings (touching endpoints allowed)
@@ -61,8 +61,9 @@ export function checkAvailability(
     return {
       decision: "unavailable",
       reason: `Overlaps with an existing booking (${minutesToLabel(conflict.start)}–${minutesToLabel(conflict.end)} by ${conflict.bookedBy}).`,
+      reasonCode: "OVERLAP",
     };
   }
 
-  return { decision: "available", reason: `${room.name} is available for this interval.` };
+  return { decision: "available", reason: `${room.name} is available for this interval.`, reasonCode: "AVAILABLE" };
 }

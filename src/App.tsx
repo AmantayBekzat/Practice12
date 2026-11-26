@@ -6,6 +6,7 @@ import type { CheckResult } from "@/lib/types";
 import { RoomCard } from "@/components/RoomCard";
 import { Timeline } from "@/components/Timeline";
 import { ResultBanner } from "@/components/ResultBanner";
+import { Practice12Panel } from "@/components/Practice12Panel";
 
 const TIME_SLOTS: string[] = (() => {
   const arr: string[] = [];
@@ -197,6 +198,10 @@ export default function App() {
           </section>
         </div>
       </main>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <Practice12Panel />
+      </div>
 
       <footer className="max-w-5xl mx-auto px-4 sm:px-6 pb-8">
         <p className="text-center text-xs text-gray-400">

@@ -1,0 +1,128 @@
+================================================================================
+PRACTICE 12 — VERIFICATION RESULTS
+Actual command outputs, 2026-11-26
+================================================================================
+
+BASELINE (prior turn, recorded):
+  npx vitest run: 17 passed, 0 failed
+  npm run build: OK
+  npm run typecheck: OK
+  npm run lint: OK
+
+================================================================================
+COMMAND: npx vitest run
+EXIT CODE: 0
+================================================================================
+ RUN  v2.1.9 /home/project
+
+ ✓ src/lib/practice12.test.ts (18 tests) 9ms
+ ✓ src/lib/validation.test.ts (17 tests) 4ms
+
+ Test Files  2 passed (2)
+      Tests  35 passed (35)
+   Start at  10:26:06
+   Duration  458ms (transform 53ms, setup 0ms, collect 64ms, tests 13ms, environment 0ms, prepare 170ms)
+
+Test totals: 35 passed, 0 failed.
+  - Inherited validation tests: 17 passed, 0 failed (preserved, unchanged)
+  - New Practice 12 tests:     18 passed, 0 failed
+Compared with 17-test baseline: +18 new tests, 0 regressions.
+
+================================================================================
+COMMAND: npm run build
+EXIT CODE: 0
+================================================================================
+> vite-react-typescript-starter@0.0.0 build
+> vite build
+
+vite v5.4.8 building for production...
+transforming...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 1575 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.71 kB │ gzip:  0.38 kB
+dist/assets/index-Cqkj0fwb.css   15.69 kB │ gzip:  3.78 kB
+dist/assets/index-C9W9yPgc.js   169.34 kB │ gzip: 52.67 kB
+✓ built in 2.01s
+
+(The Browserslist caniuse-lite notice is informational, not an error.)
+
+================================================================================
+COMMAND: npm run typecheck
+EXIT CODE: 0
+================================================================================
+> vite-react-typescript-starter@0.0.0 typecheck
+> tsc --noEmit -p tsconfig.app.json
+
+No type errors.
+
+================================================================================
+COMMAND: npm run lint
+EXIT CODE: 0
+================================================================================
+> vite-react-typescript-starter@0.0.0 lint
+> eslint .
+
+No lint errors.
+
+================================================================================
+REGRESSIONS ENCOUNTERED AND FIXED DURING IMPLEMENTATION
+================================================================================
+1. practice12.test.ts midnight-boundary test initially used duration=480 which
+   exceeds the 120-minute limit, so it correctly returned INVALID_DURATION, not
+   AVAILABLE. Fixed the test input to start=1320, duration=120 (end=1440) which
+   is a valid 120-minute interval ending at midnight. This was a test-input
+   error, not a production bug. No tests were weakened.
+
+2. practice12.ts had an unused 'Booking' type import. Removed it. No behavior
+   change.
+
+Neither fix weakened any assertion or modified production rule logic.
+
+================================================================================
+CHANGED / NEW FILE SUMMARY
+================================================================================
+Modified files:
+  src/lib/types.ts          - Added ReasonCode type union and optional
+                              reasonCode field to CheckResult.
+  src/lib/validation.ts     - Attached reasonCode to every existing return
+                              (8 returns). Signature, branch order, decision
+                              and reason text preserved.
+  src/App.tsx               - Imported Practice12Panel and rendered it below
+                              the inherited main UI, above the footer.
+
+New files:
+  src/lib/practice12.ts     - Comparison module: validates shared contract,
+                              clones r1 for scenario blocked flag, calls
+                              checkAvailability with original bookings and
+                              currentTime=540, maps to canonical output.
+                              Includes typed SHARED_TEST_CASES and
+                              runSharedTests() runner.
+  src/lib/practice12.test.ts - 18 focused Vitest tests (8 shared cases + edge
+                               cases + runner pass-count check).
+  src/components/Practice12Panel.tsx - Collapsible panel component with start
+                              time, duration, blocked checkbox, check button,
+                              "Run 8 shared tests" button, and result display.
+  docs/practice12-contract.txt  - Contract, ACs, scope comparison, timings.
+  docs/practice12-verification.txt - This file.
+
+Unchanged files (confirmed):
+  src/lib/sampleData.ts     - Byte-identical (fixture data untouched).
+  src/lib/validation.test.ts - All 17 existing tests preserved, unchanged.
+  src/components/RoomCard.tsx, Timeline.tsx, ResultBanner.tsx - Unchanged.
+  package.json, package-lock.json, config files - Unchanged.
+  No packages installed or upgraded.
+
+================================================================================
+LIMITATIONS
+================================================================================
+- Browser screenshots were NOT taken. No browser/screenshot tool is available in
+  this environment. AC6 desktop/mobile visual verification is pending unless the
+  UI is actually checked in a browser.
+- A separate Node-RED workflow is being prepared outside Bolt; this document does
+  not claim it is completed.
+- No services connected, no messages sent, no sharing/publishing modified.
+================================================================================
